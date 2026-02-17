@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Primera División</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* (Estilos originales, sin cambios) */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', 'Helvetica', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color: #e0e0e0; padding: 10px; min-height: 100vh; overflow-y: scroll; }
+        ::-webkit-scrollbar { width: 12px; }
+        ::-webkit-scrollbar-track { background: #1a1a2e; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); border-radius: 6px; border: 2px solid #1a1a2e; }
+        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(135deg, #ffed4e 0%, #ffd700 100%); }
+        * { scrollbar-width: thin; scrollbar-color: #ffd700 #1a1a2e; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        .clasificacion-section { background: linear-gradient(135deg, #1e2a3a 0%, #2d3e50 100%); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #3a4f63; }
+        .clasificacion-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; background: linear-gradient(135deg, #6a1b9a 0%, #ab47bc 100%); padding: 10px; border-radius: 8px; }
+        .clasificacion-title { font-size: 2em; font-weight: bold; background: linear-gradient(90deg, #ffd700 0%, #ffed4e 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 20px rgba(255,215,0,0.3); font-family: 'Montserrat', sans-serif; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .jornada-selector { display: flex; align-items: center; gap: 5px; }
+        .jornada-selector label { color: #ffd700; font-weight: bold; }
+        .jornada-selector select { padding: 6px 10px; background: #2d3e50; color: #ffd700; border: 2px solid #ffd700; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: bold; }
+        .nav-button { padding: 6px 10px; background: #2d3e50; color: #ffd700; border: 2px solid #ffd700; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #3a4f63; align-items: center; flex-wrap: wrap; }
+        .tab { padding: 10px 20px; background: transparent; color: #8b95a0; border: none; cursor: pointer; font-size: 14px; font-weight: bold; border-bottom: 3px solid transparent; transition: all 0.3s; }
+        .tab:hover { color: #ffd700; }
+        .tab.active { color: #ffd700; border-bottom: 3px solid #ffd700; }
+        .temporada-selector { display: flex; align-items: center; gap: 5px; margin-left: auto; }
+        .temporada-selector label { color: #ffd700; font-weight: bold; }
+        .temporada-selector select { padding: 6px 10px; background: #2d3e50; color: #ffd700; border: 2px solid #ffd700; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: bold; }
+        .stats-button { padding: 8px 15px; background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: #1a1a2e; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.3s; margin-left: 10px; }
+        .stats-button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,215,0,0.4); }
+        .fullscreen-button { padding: 8px 15px; background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); color: #1a1a2e; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; text-decoration: none; display: none; transition: all 0.3s; }
+        .fullscreen-button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(74,222,128,0.4); }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th { background: linear-gradient(135deg, #2d3e50 0%, #3a4f63 100%); color: #ffd700; padding: 10px 5px; text-align: left; font-weight: bold; text-transform: uppercase; font-size: 0.8em; letter-spacing: 1px; border-bottom: 2px solid #ffd700; }
+        td { padding: 8px 5px; border-bottom: 1px solid #3a4f63; background: rgba(45, 62, 80, 0.3); }
+        tr:hover td { background: rgba(255, 215, 0, 0.1) !important; }
+        .pos { font-weight: bold; color: #ffd700; width: 50px; text-align: center; font-size: 1.1em; cursor: pointer; }
+        .team { font-weight: 600; color: #e0e0e0; cursor: pointer; }
+        .team img { width: 16px; height: 16px; margin-right: 5px; vertical-align: middle; }
+        .stats { text-align: center; width: 60px; font-weight: 500; color: #b0b0b0; cursor: pointer; transition: all 0.2s; }
+        .stats:hover { color: #ffd700; transform: scale(1.1); }
+        .form { text-align: center; display: flex; justify-content: center; gap: 5px; }
+        .form-circle { display: inline-block; width: 20px; height: 20px; border-radius: 50%; text-align: center; line-height: 20px; font-size: 12px; color: white; }
+        .form-win { background: #4ade80; }
+        .form-draw { background: #fbbf24; }
+        .form-loss { background: #ff4757; }
+        .arrow { font-size: 14px; margin-left: 5px; }
+        .up { color: #4ade80; }
+        .down { color: #ff4757; }
+        tr.row-leader td { background: rgba(74, 222, 128, 0.15) !important; }
+        tr.row-champions td { background: rgba(52, 152, 219, 0.15) !important; }
+        tr.row-europa td { background: rgba(230, 126, 34, 0.15) !important; }
+        tr.row-playoff td { background: rgba(255, 107, 107, 0.15) !important; }
+        tr.row-descenso td { background: rgba(231, 76, 60, 0.15) !important; }
+        .legend { display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; margin-top: 15px; font-size: 0.9em; color: #b0b0b0; }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .color-box { width: 20px; height: 20px; border-radius: 4px; border: 1px solid #3a4f63; }
+        .loading { text-align: center; padding: 20px; font-size: 1.2em; color: #ffd700; }
+        .error { background: rgba(220, 53, 69, 0.2); border: 2px solid #dc3545; padding: 15px; border-radius: 8px; color: #ff6b6b; margin-bottom: 15px; }
+        .resultados-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 20px; }
+        .jornada { background: linear-gradient(135deg, #1e2a3a 0%, #2d3e50 100%); border-radius: 10px; padding: 10px; border: 1px solid #3a4f63; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .jornada-title { font-size: 1.1em; font-weight: bold; color: #ffd700; margin-bottom: 8px; padding-bottom: 5px; border-bottom: 2px solid #ffd700; text-align: center; }
+        .match { display: flex; align-items: center; padding: 6px; margin-bottom: 5px; background: rgba(45, 62, 80, 0.5); border-radius: 6px; transition: all 0.3s; border-left: 3px solid #3a4f63; font-size: 0.9em; }
+        .match:hover { background: rgba(255, 215, 0, 0.1); border-left-color: #ffd700; }
+        .match-home, .match-away { flex: 1; font-weight: 500; color: #b0b0b0; cursor: pointer; transition: all 0.2s; }
+        .match-home:hover, .match-away:hover { color: #ffd700; }
+        .match-home { text-align: right; padding-right: 8px; }
+        .match-away { text-align: left; padding-left: 8px; }
+        .match-score { padding: 4px 10px; background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: #1a1a2e; border-radius: 4px; font-weight: bold; min-width: 45px; text-align: center; font-size: 0.9em; }
+        .winner { color: #4ade80 !important; font-weight: bold; }
+        .loser { color: #6b7280 !important; }
+        .draw { color: #fbbf24 !important; }
+        .highlighted { color: #ff4757 !important; font-weight: bold; text-shadow: 0 0 10px rgba(255, 71, 87, 0.5); }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); }
+        .modal-content { background: linear-gradient(135deg, #1e2a3a 0%, #2d3e50 100%); margin: 5% auto; padding: 20px; border: 2px solid #ffd700; border-radius: 12px; width: 80%; max-width: 700px; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.7); }
+        .modal-content::-webkit-scrollbar { width: 8px; }
+        .modal-content::-webkit-scrollbar-track { background: #2d3e50; }
+        .modal-content::-webkit-scrollbar-thumb { background: #ffd700; border-radius: 4px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #ffd700; }
+        .modal-title { font-size: 1.5em; font-weight: bold; color: #ffd700; }
+        .modal-title img { width: 36px; height: 36px; margin-right: 10px; vertical-align: middle; }
+        .close { color: #ffd700; font-size: 35px; font-weight: bold; cursor: pointer; line-height: 1; transition: all 0.2s; }
+        .close:hover { color: #ff4757; transform: scale(1.2); }
+        .modal-match { padding: 10px; margin-bottom: 8px; background: rgba(45, 62, 80, 0.5); border-radius: 6px; border-left: 3px solid #ffd700; }
+        .modal-match .team-highlight { color: #ff4757 !important; font-weight: bold; }
+        #progChart { width: 100%; height: 300px; }
+        .compare-selector { margin-top: 10px; text-align: center; }
+        .compare-selector select { padding: 6px 10px; background: #2d3e50; color: #ffd700; border: 2px solid #ffd700; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: bold; }
+        .team-selector { display: flex; justify-content: center; gap: 20px; margin: 20px 0; flex-wrap: wrap; }
+        .team-selector h3 { width: 100%; text-align: center; color: #ffd700; font-size: 1.2em; margin-bottom: 10px; }
+        .team-selector select { padding: 8px 12px; background: #2d3e50; color: #ffd700; border: 2px solid #ffd700; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: bold; min-width: 200px; }
+        .reset-cross { color: #ff4757; cursor: pointer; margin-left: 5px; font-size: 18px; }
+        #headtohead { background: linear-gradient(135deg, #1e2a3a 0%, #2d3e50 100%); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #3a4f63; }
+        #headtohead h3 { color: #ffd700; margin-bottom: 10px; }
+        #headtohead .match { margin-bottom: 10px; }
+        .modal-tabs { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #3a4f63; }
+        .modal-tab { padding: 10px 20px; background: transparent; color: #8b95a0; border: none; cursor: pointer; font-size: 14px; font-weight: bold; border-bottom: 3px solid transparent; transition: all 0.3s; }
+        .modal-tab:hover { color: #ffd700; }
+        .modal-tab.active { color: #ffd700; border-bottom: 3px solid #ffd700; }
+        .modal-tab-content { display: none; }
+        .modal-tab-content.active { display: block; }
+        .resultados-lista .modal-match { display: flex; justify-content: space-between; align-items: center; }
+        .resultados-lista .form-circle { margin-left: 10px; }
+        .progresion-table { width: 100%; border-collapse: collapse; }
+        .progresion-table th, .progresion-table td { padding: 8px; border: 1px solid #3a4f63; text-align: center; }
+        .destacados-lista { list-style: none; padding: 0; }
+        .destacados-lista li { margin-bottom: 10px; }
+        .destacados-lista strong { color: #ffd700; }
+        .info-message { font-size: 0.8em; color: #b0b0b0; margin-left: 10px; align-self: center; }
+        .future-link { display: block; text-align: center; margin-top: 20px; color: #ffd700; text-decoration: none; cursor: pointer; }
+        .future-link:hover { text-decoration: underline; }
+        .stats-tabs { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #3a4f63; }
+        .stats-tab { padding: 10px 20px; background: transparent; color: #8b95a0; border: none; cursor: pointer; font-size: 14px; font-weight: bold; border-bottom: 3px solid transparent; transition: all 0.3s; }
+        .stats-tab:hover { color: #ffd700; }
+        .stats-tab.active { color: #ffd700; border-bottom: 3px solid #ffd700; }
+        .stats-tab-content { display: none; }
+        .stats-tab-content.active { display: block; }
+        .back-to-top { position: absolute; bottom: 20px; right: 20px; background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: #1a1a2e; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: all 0.3s; z-index: 10; }
+        .back-to-top:hover { transform: translateY(-5px); box-shadow: 0 6px 15px rgba(0,0,0,0.4); }
+        .estadisticas-container { position: relative; padding-bottom: 60px; }
+        .historico-message { text-align: center; padding: 20px; background: rgba(255, 215, 0, 0.1); border: 2px solid #ffd700; border-radius: 8px; margin: 20px 0; font-size: 1.2em; color: #ffd700; }
+        .range-slider-container { background: linear-gradient(135deg, #1e2a3a 0%, #2d3e50 100%); border: 1px solid #ffd700; border-radius: 8px; padding: 15px 20px; margin: 20px 0; display: flex; flex-direction: column; gap: 10px; }
+        .range-slider-container label { color: #ffd700; font-weight: bold; font-size: 1em; }
+        .slider-values { display: flex; justify-content: space-between; color: #e0e0e0; font-size: 0.9em; }
+        .sliders { display: flex; gap: 20px; align-items: center; }
+        .slider-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .slider-item span { color: #ffd700; }
+        input[type=range] { width: 100%; height: 6px; background: #2d3e50; border-radius: 3px; outline: none; -webkit-appearance: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: #ffd700; border-radius: 50%; cursor: pointer; border: 2px solid #1a1a2e; box-shadow: 0 0 5px rgba(255,215,0,0.5); }
+        input[type=range]::-moz-range-thumb { width: 18px; height: 18px; background: #ffd700; border-radius: 50%; cursor: pointer; border: 2px solid #1a1a2e; }
+        /* Nuevo estilo para enlace "Ver más" */
+        .ver-mas-link { display: inline-block; margin-top: 10px; color: #ffd700; text-decoration: none; font-weight: bold; cursor: pointer; }
+        .ver-mas-link:hover { text-decoration: underline; }
+        @media (max-width: 1400px) { .resultados-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 1024px) { .resultados-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .resultados-grid { grid-template-columns: 1fr; } .clasificacion-title { font-size: 1.5em; } .modal-content { width: 95%; margin: 10% auto; } .clasificacion-header { flex-direction: column; align-items: flex-start; } .tabs { flex-wrap: wrap; } .team-selector { flex-direction: column; gap: 10px; } table { font-size: 0.9em; } th, td { padding: 6px 3px; } .form-circle { width: 18px; height: 18px; line-height: 18px; font-size: 10px; } .stats-button { margin-left: 0; margin-top: 10px; } .stats-tabs { flex-wrap: wrap; } .temporada-selector { margin-left: 0; width: 100%; justify-content: flex-end; } .sliders { flex-direction: column; gap: 15px; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div id="loading" class="loading" style="display:block;">⏳ Cargando datos...</div>
+    <div id="error" class="error" style="display:none;"></div>
+
+    <div id="clasificacion-container" style="display:none;">
+        <div class="clasificacion-section">
+            <div class="clasificacion-header">
+                <div class="header-left">
+                    <h1 class="clasificacion-title">Clasificación de Primera División</h1>
+                    <a id="fullscreenBtn" class="fullscreen-button" target="_blank" href="https://www.tusoccermanager.com/h100-primeradivisiont36-html">Ver en pantalla completa</a>
+                </div>
+                <div class="jornada-selector">
+                    <label>Hasta jornada:</label>
+                    <button class="nav-button" onclick="changeJornada(-1)">←</button>
+                    <select id="jornadaSelect" onchange="filtrarPorJornada()">
+                        <option value="all">Todas</option>
+                    </select>
+                    <button class="nav-button" onclick="changeJornada(1)">→</button>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="cambiarTab('general')">General</button>
+                <button class="tab" onclick="cambiarTab('local')">Local</button>
+                <button class="tab" onclick="cambiarTab('visitante')">Visitante</button>
+                <span class="info-message" id="click-info-message">(Click en columnas/valores para detalles)</span>
+                <div class="temporada-selector">
+                    <label>Otras temporadas:</label>
+                    <select id="temporadaSelect" onchange="cambiarTemporada()">
+                        <option value="actual">Temporada actual</option>
+                    </select>
+                </div>
+                <button class="stats-button" onclick="scrollToEstadisticas()">Estadísticas</button>
+            </div>
+
+            <!-- Contenedor del slider de rango (visible solo en modo histórico) -->
+            <div id="rangeSliderContainer" class="range-slider-container" style="display: none;">
+                <label>Selecciona rango de temporadas:</label>
+                <div class="slider-values">
+                    <span id="minTempLabel">Temp. mín: </span>
+                    <span id="maxTempLabel">Temp. máx: </span>
+                </div>
+                <div class="sliders">
+                    <div class="slider-item">
+                        <span>Mín</span>
+                        <input type="range" id="minTempSlider" min="0" max="0" value="0" step="1" oninput="actualizarRangoHistorico()">
+                    </div>
+                    <div class="slider-item">
+                        <span>Máx</span>
+                        <input type="range" id="maxTempSlider" min="0" max="0" value="0" step="1" oninput="actualizarRangoHistorico()">
+                    </div>
+                </div>
+            </div>
+
+            <div id="tabla-general"></div>
+            <div id="tabla-local" style="display:none;"></div>
+            <div id="tabla-visitante" style="display:none;"></div>
+        </div>
+    </div>
+
+    <div class="team-selector">
+        <h3>Partidos entre...</h3>
+        <div id="team1-container">
+            <select id="team1" onchange="updateTeamSelectors(); mostrarHeadToHead()"></select>
+            <span id="reset-team1" class="reset-cross" style="display:none;" onclick="resetSelect('team1')">×</span>
+        </div>
+        <div id="team2-container">
+            <select id="team2" onchange="updateTeamSelectors(); mostrarHeadToHead()"></select>
+            <span id="reset-team2" class="reset-cross" style="display:none;" onclick="resetSelect('team2')">×</span>
+        </div>
+    </div>
+
+    <div id="headtohead"></div>
+    <span class="info-message" id="click-equipos-message">(Haz click en equipos para resaltarlos)</span>
+    <div id="resultados"></div>
+    <div id="future-resultados" style="display:none;"></div>
+    <a href="#" class="future-link" onclick="toggleFutureJornadas(); return false;">Ver próximas jornadas</a>
+
+    <div id="estadisticas-liga" class="clasificacion-section" style="margin-top: 20px;"></div>
+</div>
+
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="modal-title" id="modalTitle"></span>
+            <span class="close" onclick="cerrarModal()">×</span>
+        </div>
+        <div id="modalTabs" class="modal-tabs" style="display:none;">
+            <button class="modal-tab active" onclick="cambiarModalTab('resultados')">Resultados</button>
+            <button class="modal-tab" onclick="cambiarModalTab('progresion')">Progresión</button>
+            <button class="modal-tab" onclick="cambiarModalTab('destacados')">Resultados destacados</button>
+        </div>
+        <div id="modalBody"></div>
+    </div>
+</div>
+
+<script>
+    // ==================== VARIABLES GLOBALES ====================
+    const url = 'https://www.gesliga.com/Calendario.aspx?Liga=495589';
+    const shieldsUrl = 'https://www.tusoccermanager.com/h63-teambadgedb-html';
+    const headToHeadUrl = 'https://www.tusoccermanager.com/h114-headtohead-html'; // Nueva URL
+    let todasLasJornadas = [];
+    let todasLasJornadasCompleto = [];
+    let teamMatches = {};
+    let equipoSeleccionado = null;
+    let jornadaActual = 'all';
+    let equiposGeneral = [];
+    let equiposLocal = [];
+    let equiposVisitante = [];
+    let currentSort = {
+        general: {key: 'puntos', dir: 'desc'},
+        local: {key: 'puntos', dir: 'desc'},
+        visitante: {key: 'puntos', dir: 'desc'}
+    };
+    let shields = {};
+    const clickSound = new Audio('https://www.tusoccermanager.com/download?id=1499');
+    let lastPlayedIndex = 0;
+    let teamsList = [];
+    let progChart = null;
+
+    // Variables para temporadas
+    let temporadaSeleccionada = 'actual';
+    let datosTemporadaActual = null;
+    let temporadasPasadas = {};
+    let equiposPorTemporada = new Map();
+    let temporadasDisponibles = [];
+    let TEMPORADA_ACTUAL = 0; // Se calculará después de cargar históricas
+
+    // ==================== FUNCIONES ORIGINALES ====================
+    if (window.self !== window.top) {
+        document.getElementById('fullscreenBtn').style.display = 'block';
+    }
+
+    function scrollToEstadisticas() {
+        document.getElementById('estadisticas-liga').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function cargarResultados() {
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        try {
+            const shieldsResponse = await fetch(shieldsUrl, { method: 'GET', cache: 'no-cache' });
+            if (!shieldsResponse.ok) throw new Error('Failed to fetch shields');
+            const shieldsHtml = await shieldsResponse.text();
+            const shieldsDoc = new DOMParser().parseFromString(shieldsHtml, 'text/html');
+            shieldsDoc.querySelectorAll('#shields-list li').forEach(li => {
+                const [team, url] = li.textContent.split(': ').map(s => s.trim());
+                shields[team] = url;
+            });
+
+            const proxies = [
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+                `https://corsproxy.io/?${encodeURIComponent(url)}`,
+                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+            ];
+
+            let html = null;
+            let lastError = null;
+
+            function isValidResponse(text) {
+                return text.includes('divJornada') && text.includes('FilaResultado');
+            }
+
+            try {
+                const racePromises = proxies.map(proxy => 
+                    fetch(proxy, { method: 'GET', cache: 'no-cache', timeout: 10000 })
+                        .then(response => response.ok ? response.text() : Promise.reject(`HTTP ${response.status}`))
+                );
+                html = await Promise.race(racePromises);
+                if (!isValidResponse(html)) throw new Error('Respuesta no válida');
+            } catch (raceError) {
+                for (const proxy of proxies) {
+                    try {
+                        const response = await fetch(proxy, { method: 'GET', cache: 'no-cache', timeout: 10000 });
+                        if (response.ok) {
+                            html = await response.text();
+                            if (isValidResponse(html)) break;
+                        }
+                    } catch (err) {
+                        lastError = err;
+                    }
+                }
+            }
+
+            if (!html || !isValidResponse(html)) {
+                throw new Error('No se pudo conectar. ' + (lastError ? lastError.message : ''));
+            }
+
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            let jornadasActuales = extraerJornadas(doc);
+            // La temporada actual se asignará más tarde, cuando conozcamos TEMPORADA_ACTUAL
+            datosTemporadaActual = JSON.parse(JSON.stringify(jornadasActuales));
+
+            if (jornadasActuales.length === 0) throw new Error('No se encontraron resultados.');
+
+            // No asignamos todavía a todasLasJornadas porque necesitamos TEMPORADA_ACTUAL
+            // Primero cargamos las históricas para calcular TEMPORADA_ACTUAL
+            await cargarTemporadasPasadas(); // Esto ahora se llama explícitamente
+
+            // Una vez que tenemos TEMPORADA_ACTUAL, asignamos la temporada actual a las jornadas
+            datosTemporadaActual = datosTemporadaActual.map(j => ({ ...j, temporada: TEMPORADA_ACTUAL }));
+            todasLasJornadas = datosTemporadaActual;
+            reconstruirTeamMatchesDesdeJornadas(todasLasJornadas);
+            teamsList = Object.keys(teamMatches).sort();
+            llenarSelectorJornadas();
+            llenarSelectoresEquipos();
+            lastPlayedIndex = todasLasJornadas.reduce((max, j, i) => j.partidos.some(p => p.isPlayed) ? i : max, -1);
+            const playedJornadas = todasLasJornadas.slice(0, lastPlayedIndex + 1);
+            mostrarResultados(playedJornadas, 'resultados');
+            calcularYMostrarClasificacion();
+            calcularEstadisticasLiga();
+
+            document.getElementById('clasificacion-container').style.display = 'block';
+
+        } catch (err) {
+            error.textContent = '❌ Error: ' + err.message;
+            error.style.display = 'block';
+        } finally {
+            loading.style.display = 'none';
+        }
+    }
+
+    function extraerJornadas(doc) {
+        const jornadas = [];
+        const jornadasDiv = doc.querySelectorAll('.divJornada');
+        jornadasDiv.forEach((jornadaDiv, index) => {
+            const tituloElement = jornadaDiv.querySelector('.Cabecera span');
+            if (!tituloElement) return;
+            const titulo = tituloElement.textContent.trim();
+            const partidos = [];
+            const filas = jornadaDiv.querySelectorAll('.FilaResultado');
+            filas.forEach((fila) => {
+                const localLink = fila.querySelector('.CompetidorLocal a');
+                const visitanteLink = fila.querySelector('.CompetidorVisitante a');
+                const parcialTd = fila.querySelector('.Parcial');
+                if (!localLink || !visitanteLink || !parcialTd) return;
+                const local = localLink.textContent.trim();
+                const visitante = visitanteLink.textContent.trim();
+                const parcial = parcialTd.textContent.trim();
+                let golesLocal = null, golesVisitante = null, resultado = '-', isPlayed = false;
+                if (parcial && /^\d+-\d+$/.test(parcial)) {
+                    const [gl, gv] = parcial.split('-');
+                    golesLocal = parseInt(gl, 10);
+                    golesVisitante = parseInt(gv, 10);
+                    resultado = parcial;
+                    isPlayed = true;
+                }
+                partidos.push({ local, visitante, golesLocal, golesVisitante, resultado, isPlayed });
+            });
+            if (partidos.length > 0) {
+                jornadas.push({ titulo, partidos });
+            }
+        });
+        return jornadas;
+    }
+
+    function llenarSelectorJornadas() {
+        const select = document.getElementById('jornadaSelect');
+        select.innerHTML = '<option value="all">Todas</option>';
+        const maxIndex = temporadaSeleccionada === 'actual' ? lastPlayedIndex : todasLasJornadas.length - 1;
+        todasLasJornadas.forEach((jornada, index) => {
+            if (index <= maxIndex) {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = jornada.titulo;
+                select.appendChild(option);
+            }
+        });
+        jornadaActual = 'all';
+    }
+
+    function llenarSelectoresEquipos() {
+        const select1 = document.getElementById('team1');
+        const select2 = document.getElementById('team2');
+        select1.innerHTML = '<option value="">Selecciona equipo 1</option>';
+        select2.innerHTML = '<option value="">Selecciona equipo 2</option>';
+        teamsList.forEach(team => {
+            const opt1 = document.createElement('option');
+            opt1.value = team;
+            opt1.textContent = team;
+            select1.appendChild(opt1);
+            const opt2 = opt1.cloneNode(true);
+            select2.appendChild(opt2);
+        });
+    }
+
+    function updateTeamSelectors() {
+        const team1 = document.getElementById('team1').value;
+        const team2 = document.getElementById('team2').value;
+        document.getElementById('reset-team1').style.display = team1 ? 'inline' : 'none';
+        document.getElementById('reset-team2').style.display = team2 ? 'inline' : 'none';
+        const select1 = document.getElementById('team1');
+        const select2 = document.getElementById('team2');
+        Array.from(select1.options).forEach(opt => {
+            if (opt.value === team2 && opt.value !== '') opt.disabled = true;
+            else opt.disabled = false;
+        });
+        Array.from(select2.options).forEach(opt => {
+            if (opt.value === team1 && opt.value !== '') opt.disabled = true;
+            else opt.disabled = false;
+        });
+    }
+
+    function resetSelect(id) {
+        document.getElementById(id).value = '';
+        updateTeamSelectors();
+        mostrarHeadToHead();
+    }
+
+    function changeJornada(dir) {
+        playSound();
+        const select = document.getElementById('jornadaSelect');
+        let newIndex = select.selectedIndex + dir;
+        if (newIndex < 0) newIndex = 0;
+        if (newIndex >= select.options.length) newIndex = select.options.length - 1;
+        select.selectedIndex = newIndex;
+        filtrarPorJornada();
+    }
+
+    function filtrarPorJornada() {
+        jornadaActual = document.getElementById('jornadaSelect').value;
+        calcularYMostrarClasificacion();
+    }
+
+    function sortDefault(a, b) {
+        if (b.puntos !== a.puntos) return b.puntos - a.puntos;
+        if (b.diferencia !== a.diferencia) return b.diferencia - a.diferencia;
+        return b.golesFavor - a.golesFavor;
+    }
+
+    function calcularClasificacion(jornadas, tipo) {
+        const equipos = {};
+        jornadas.forEach(jornada => {
+            jornada.partidos.forEach(partido => {
+                if (!equipos[partido.local]) equipos[partido.local] = inicializarEquipo(partido.local);
+                if (!equipos[partido.visitante]) equipos[partido.visitante] = inicializarEquipo(partido.visitante);
+            });
+        });
+        jornadas.forEach(jornada => {
+            jornada.partidos.forEach(partido => {
+                if (partido.golesLocal === null) return;
+                if (tipo === 'general' || tipo === 'local') {
+                    const local = equipos[partido.local];
+                    local.jugados++;
+                    local.golesFavor += partido.golesLocal;
+                    local.golesContra += partido.golesVisitante;
+                    const diff = partido.golesLocal - partido.golesVisitante;
+                    if (diff > 0) { local.puntos += 3; local.ganados++; }
+                    else if (diff < 0) local.perdidos++;
+                    else { local.puntos += 1; local.empatados++; }
+                    local.diferencia = local.golesFavor - local.golesContra;
+                }
+                if (tipo === 'general' || tipo === 'visitante') {
+                    const visitante = equipos[partido.visitante];
+                    visitante.jugados++;
+                    visitante.golesFavor += partido.golesVisitante;
+                    visitante.golesContra += partido.golesLocal;
+                    const diff = partido.golesVisitante - partido.golesLocal;
+                    if (diff > 0) { visitante.puntos += 3; visitante.ganados++; }
+                    else if (diff < 0) visitante.perdidos++;
+                    else { visitante.puntos += 1; visitante.empatados++; }
+                    visitante.diferencia = visitante.golesFavor - visitante.golesContra;
+                }
+            });
+        });
+        const equiposArray = Object.values(equipos);
+        equiposArray.sort(sortDefault);
+        return equiposArray;
+    }
+
+    function inicializarEquipo(nombre) {
+        return {
+            nombre, puntos: 0, jugados: 0, ganados: 0, empatados: 0, perdidos: 0,
+            golesFavor: 0, golesContra: 0, diferencia: 0, form: []
+        };
+    }
+
+    function crearTablaClasificacion(equipos, tipo, hideLegendAndColors = false) {
+        const showArrows = currentSort[tipo].key === 'puntos' && currentSort[tipo].dir === 'desc';
+        let html = '<table><thead><tr>';
+        html += '<th class="pos" title="Posición en la clasificación">Pos</th>';
+        html += '<th class="team" title="Nombre del equipo">Equipo</th>';
+        html += '<th class="stats" onclick="sortTable(\'' + tipo + '\', \'jugados\')" title="Partidos jugados">PJ</th>';
+        html += '<th class="stats" onclick="sortTable(\'' + tipo + '\', \'ganados\')" title="Partidos ganados">G</th>';
+        html += '<th class="stats" onclick="sortTable(\'' + tipo + '\', \'empatados\')" title="Partidos empatados">E</th>';
+        html += '<th class="stats" onclick="sortTable(\'' + tipo + '\', \'perdidos\')" title="Partidos perdidos">P</th>';
+        html += '<th class="stats" onclick="sortTable(\'' + tipo + '\', \'golesFavor\')" title="Goles a favor">GF</th>';
+        html += '<th class="stats" onclick="sortTable(\'' + tipo + '\', \'golesContra\')" title="Goles en contra">GC</th>';
+        html += '<th class="stats" onclick="sortTable(\'' + tipo + '\', \'diferencia\')" title="Diferencia de goles">DIF</th>';
+        html += '<th class="stats" onclick="sortTable(\'' + tipo + '\', \'puntos\')" title="Puntos totales">PTS</th>';
+        html += '<th class="stats" title="Forma reciente (últimos 5 partidos)">Últimos 5 par.</th>';
+        html += '</tr></thead><tbody>';
+
+        equipos.forEach((equipo, index) => {
+            const diff = equipo.diferencia > 0 ? '+' + equipo.diferencia : equipo.diferencia;
+            const rowClass = hideLegendAndColors ? '' : getRowClass(index + 1);
+            const arrow = showArrows && equipo.prevPos ? getArrow(equipo.prevPos, index + 1) : '';
+            const shieldImg = shields[equipo.nombre] ? `<img src="${shields[equipo.nombre]}" width="16" height="16" alt="Escudo de ${equipo.nombre}">` : '';
+            const formHtml = equipo.form.map(f => 
+                `<span class="form-circle form-${f.result === 'V' ? 'win' : f.result === 'E' ? 'draw' : 'loss'}" title="${f.title}">${f.result}</span>`
+            ).join('');
+            html += `<tr class="${rowClass}">`;
+            html += `<td class="pos" onclick="playSound(); mostrarProgresion('${equipo.nombre}', '${tipo}')">${index + 1}</td>`;
+            html += `<td class="team" onclick="playSound(); mostrarEquipoModal('${equipo.nombre}', '${tipo}')">${shieldImg}${equipo.nombre}${arrow}</td>`;
+            html += `<td class="stats" onclick="playSound(); mostrarDetalle('${equipo.nombre}', 'jugados', '${tipo}')">${equipo.jugados}</td>`;
+            html += `<td class="stats" onclick="playSound(); mostrarDetalle('${equipo.nombre}', 'ganados', '${tipo}')">${equipo.ganados}</td>`;
+            html += `<td class="stats" onclick="playSound(); mostrarDetalle('${equipo.nombre}', 'empatados', '${tipo}')">${equipo.empatados}</td>`;
+            html += `<td class="stats" onclick="playSound(); mostrarDetalle('${equipo.nombre}', 'perdidos', '${tipo}')">${equipo.perdidos}</td>`;
+            html += `<td class="stats" onclick="playSound(); mostrarDetalle('${equipo.nombre}', 'golesFavor', '${tipo}')">${equipo.golesFavor}</td>`;
+            html += `<td class="stats" onclick="playSound(); mostrarDetalle('${equipo.nombre}', 'golesContra', '${tipo}')">${equipo.golesContra}</td>`;
+            html += `<td class="stats">${diff}</td>`;
+            html += `<td class="stats"><strong>${equipo.puntos}</strong></td>`;
+            html += `<td class="form">${formHtml}</td>`;
+            html += '</tr>';
+        });
+
+        html += '</tbody></table>';
+        
+        if (!hideLegendAndColors) {
+            html += `
+                <div class="legend">
+                    <div class="legend-item"><span class="color-box" style="background: rgba(74,222,128,0.15)"></span>1º: Líder y Champions League</div>
+                    <div class="legend-item"><span class="color-box" style="background: rgba(52,152,219,0.15)"></span>2º-6º: Champions League</div>
+                    <div class="legend-item"><span class="color-box" style="background: rgba(230,126,34,0.15)"></span>7º-9º: Europa League</div>
+                    <div class="legend-item"><span class="color-box" style="background: rgba(255,107,107,0.15)"></span>10º: Play-off Descenso y Europa League</div>
+                    <div class="legend-item"><span class="color-box" style="background: rgba(231,76,60,0.15)"></span>11º-12º: Descenso y Europa League</div>
+                </div>
+            `;
+        }
+        return html;
+    }
+
+    function getRowClass(pos) {
+        if (pos === 1) return 'row-leader';
+        if (pos <= 6) return 'row-champions';
+        if (pos <= 9) return 'row-europa';
+        if (pos === 10) return 'row-playoff';
+        return 'row-descenso';
+    }
+
+    function getArrow(prev, curr) {
+        if (curr < prev) return '<span class="arrow up">↑</span>';
+        if (curr > prev) return '<span class="arrow down">↓</span>';
+        return '';
+    }
+
+    function sortTable(tipo, key) {
+        const sortObj = currentSort[tipo];
+        if (sortObj.key === key) {
+            sortObj.dir = sortObj.dir === 'desc' ? 'asc' : 'desc';
+        } else {
+            sortObj.key = key;
+            sortObj.dir = 'desc';
+        }
+        const equipos = tipo === 'general' ? equiposGeneral : tipo === 'local' ? equiposLocal : equiposVisitante;
+        sortEquipos(equipos, sortObj.key, sortObj.dir);
+        document.getElementById(`tabla-${tipo}`).innerHTML = crearTablaClasificacion(equipos, tipo, temporadaSeleccionada === 'historica');
+    }
+
+    function sortEquipos(equipos, key, dir) {
+        equipos.sort((a, b) => dir === 'desc' ? b[key] - a[key] : a[key] - b[key]);
+    }
+
+    function playSound() {
+        clickSound.play();
+    }
+
+    function mostrarDetalle(equipo, stat, tipo) {
+        const currentIdx = jornadaActual === 'all' ? todasLasJornadas.length - 1 : parseInt(jornadaActual);
+        const jornadasACalcular = todasLasJornadas.slice(0, currentIdx + 1);
+        let partidos = [];
+        jornadasACalcular.forEach(jornada => {
+            jornada.partidos.forEach(partido => {
+                if (!partido.isPlayed) return;
+                let incluir = false;
+                if (tipo === 'general') {
+                    if (partido.local === equipo || partido.visitante === equipo) {
+                        incluir = cumpleCondicion(partido, equipo, stat);
+                    }
+                } else if (tipo === 'local' && partido.local === equipo) {
+                    incluir = cumpleCondicionLocal(partido, stat);
+                } else if (tipo === 'visitante' && partido.visitante === equipo) {
+                    incluir = cumpleCondicionVisitante(partido, stat);
+                }
+                if (incluir) partidos.push({ ...partido, jornada: jornada.titulo });
+            });
+        });
+        const statNames = {
+            'jugados': 'Partidos jugados', 'ganados': 'Victorias', 'empatados': 'Empates',
+            'perdidos': 'Derrotas', 'golesFavor': 'Goles a favor', 'golesContra': 'Goles en contra'
+        };
+        const tipoStr = tipo === 'general' ? '' : `como ${tipo}`;
+        const titulo = `${equipo} - ${statNames[stat]} ${tipoStr}`.trim();
+        mostrarModal(titulo, partidos, equipo);
+    }
+
+    function cumpleCondicion(partido, equipo, stat) {
+        const esLocal = partido.local === equipo;
+        const golesEquipo = esLocal ? partido.golesLocal : partido.golesVisitante;
+        const golesRival = esLocal ? partido.golesVisitante : partido.golesLocal;
+        switch (stat) {
+            case 'jugados': return true;
+            case 'ganados': return golesEquipo > golesRival;
+            case 'empatados': return golesEquipo === golesRival;
+            case 'perdidos': return golesEquipo < golesRival;
+            case 'golesFavor': return golesEquipo > 0;
+            case 'golesContra': return golesRival > 0;
+            default: return false;
+        }
+    }
+
+    function cumpleCondicionLocal(partido, stat) {
+        switch (stat) {
+            case 'jugados': return true;
+            case 'ganados': return partido.golesLocal > partido.golesVisitante;
+            case 'empatados': return partido.golesLocal === partido.golesVisitante;
+            case 'perdidos': return partido.golesLocal < partido.golesVisitante;
+            case 'golesFavor': return partido.golesLocal > 0;
+            case 'golesContra': return partido.golesVisitante > 0;
+            default: return false;
+        }
+    }
+
+    function cumpleCondicionVisitante(partido, stat) {
+        switch (stat) {
+            case 'jugados': return true;
+            case 'ganados': return partido.golesVisitante > partido.golesLocal;
+            case 'empatados': return partido.golesVisitante === partido.golesLocal;
+            case 'perdidos': return partido.golesVisitante < partido.golesLocal;
+            case 'golesFavor': return partido.golesVisitante > 0;
+            case 'golesContra': return partido.golesLocal > 0;
+            default: return false;
+        }
+    }
+
+    let currentEquipo = '', currentTipo = '';
+    function mostrarProgresion(equipo, tipo) {
+        currentEquipo = equipo; currentTipo = tipo;
+        const currentIdx = jornadaActual === 'all' ? todasLasJornadas.length : parseInt(jornadaActual) + 1;
+        const data = getProgresionData(equipo, tipo, currentIdx);
+        const titulo = `Progresión de ${equipo} en ${tipo}`;
+        const shieldImg = shields[equipo] ? `<img src="${shields[equipo]}" width="36" height="36">` : '';
+        document.getElementById('modalTitle').innerHTML = `${shieldImg}${titulo}`;
+        document.getElementById('modalBody').innerHTML = '<canvas id="progChart"></canvas><div class="compare-selector"><label>Comparar con: </label><select id="compareTeam1" onchange="updateCompareSelectors(); updateProgChart()"><option value="">Ninguno</option></select> y <select id="compareTeam2" onchange="updateCompareSelectors(); updateProgChart()"><option value="">Ninguno</option></select></div>';
+        document.getElementById('modalTabs').style.display = 'none';
+        document.getElementById('modal').style.display = 'block';
+
+        const comp1 = document.getElementById('compareTeam1');
+        const comp2 = document.getElementById('compareTeam2');
+        teamsList.forEach(t => {
+            if (t !== equipo) {
+                comp1.appendChild(new Option(t, t));
+                comp2.appendChild(new Option(t, t));
+            }
+        });
+
+        setTimeout(() => {
+            const ctx = document.getElementById('progChart').getContext('2d');
+            progChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => `J${d.jornada}`),
+                    datasets: [{
+                        label: equipo,
+                        data: data.map(d => d.pos),
+                        borderColor: '#ffd700',
+                        backgroundColor: 'rgba(255, 215, 0, 0.2)',
+                        fill: true
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: { reverse: true, min: 1, max: data[0]?.maxTeams || 12, title: { display: true, text: 'Posición' } },
+                        x: { title: { display: true, text: 'Jornada' } }
+                    }
+                }
+            });
+        }, 100);
+    }
+
+    function getProgresionData(equipo, tipo, currentIdx) {
+        const data = [];
+        let maxTeams = 0;
+        for (let j = 1; j <= currentIdx; j++) {
+            const jornadasSlice = todasLasJornadas.slice(0, j);
+            let clasif = calcularClasificacion(jornadasSlice, tipo);
+            clasif.sort(sortDefault);
+            const pos = clasif.findIndex(e => e.nombre === equipo) + 1 || clasif.length;
+            data.push({ jornada: j, pos: pos });
+            maxTeams = clasif.length;
+        }
+        if (data.length) data[0].maxTeams = maxTeams;
+        return data;
+    }
+
+    function updateCompareSelectors() {
+        const c1 = document.getElementById('compareTeam1').value;
+        const c2 = document.getElementById('compareTeam2').value;
+        Array.from(document.getElementById('compareTeam1').options).forEach(opt => {
+            opt.disabled = opt.value === c2 && opt.value !== '';
+        });
+        Array.from(document.getElementById('compareTeam2').options).forEach(opt => {
+            opt.disabled = opt.value === c1 && opt.value !== '';
+        });
+    }
+
+    function updateProgChart() {
+        if (progChart) progChart.destroy();
+        const currentIdx = jornadaActual === 'all' ? todasLasJornadas.length : parseInt(jornadaActual) + 1;
+        const data1 = getProgresionData(currentEquipo, currentTipo, currentIdx);
+        const datasets = [{
+            label: currentEquipo,
+            data: data1.map(d => d.pos),
+            borderColor: '#ffd700',
+            backgroundColor: 'rgba(255,215,0,0.2)',
+            fill: true
+        }];
+        const c1 = document.getElementById('compareTeam1').value;
+        const c2 = document.getElementById('compareTeam2').value;
+        if (c1) {
+            const d2 = getProgresionData(c1, currentTipo, currentIdx);
+            datasets.push({ label: c1, data: d2.map(d => d.pos), borderColor: '#4ade80', backgroundColor: 'rgba(74,222,128,0.2)', fill: true });
+        }
+        if (c2) {
+            const d3 = getProgresionData(c2, currentTipo, currentIdx);
+            datasets.push({ label: c2, data: d3.map(d => d.pos), borderColor: '#ff4757', backgroundColor: 'rgba(255,71,87,0.2)', fill: true });
+        }
+        const ctx = document.getElementById('progChart').getContext('2d');
+        progChart = new Chart(ctx, {
+            type: 'line',
+            data: { labels: data1.map(d => `J${d.jornada}`), datasets },
+            options: {
+                scales: {
+                    y: { reverse: true, min: 1, max: data1[0].maxTeams, title: { display: true, text: 'Posición' } },
+                    x: { title: { display: true, text: 'Jornada' } }
+                }
+            }
+        });
+    }
+
+    function mostrarModal(titulo, partidos, equipo) {
+        const shieldImg = shields[equipo] ? `<img src="${shields[equipo]}" width="36" height="36">` : '';
+        document.getElementById('modalTitle').innerHTML = `${shieldImg}${titulo}`;
+        document.getElementById('modalTabs').style.display = 'none';
+        let html = '';
+        partidos.forEach(p => {
+            const localClass = p.local === equipo ? 'team-highlight' : '';
+            const awayClass = p.visitante === equipo ? 'team-highlight' : '';
+            html += `<div class="modal-match"><strong>${p.jornada}</strong><br><span class="${localClass}">${p.local}</span> ${p.resultado} <span class="${awayClass}">${p.visitante}</span></div>`;
+        });
+        document.getElementById('modalBody').innerHTML = html;
+        document.getElementById('modal').style.display = 'block';
+    }
+
+    function cerrarModal() {
+        document.getElementById('modal').style.display = 'none';
+        if (progChart) { progChart.destroy(); progChart = null; }
+    }
+
+    window.onclick = function(event) {
+        if (event.target === document.getElementById('modal')) cerrarModal();
+    };
+
+    function cambiarTab(tab) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById('tabla-general').style.display = tab === 'general' ? 'block' : 'none';
+        document.getElementById('tabla-local').style.display = tab === 'local' ? 'block' : 'none';
+        document.getElementById('tabla-visitante').style.display = tab === 'visitante' ? 'block' : 'none';
+    }
+
+    function mostrarResultados(jornadas, divId) {
+        const div = document.getElementById(divId);
+        let html = '<div class="resultados-grid">';
+        jornadas.forEach(jornada => {
+            html += '<div class="jornada">';
+            html += `<div class="jornada-title">${jornada.titulo}</div>`;
+            jornada.partidos.forEach(partido => {
+                let localClass = '', visitanteClass = '';
+                if (partido.isPlayed) {
+                    localClass = partido.golesLocal > partido.golesVisitante ? 'winner' : partido.golesLocal < partido.golesVisitante ? 'loser' : 'draw';
+                    visitanteClass = partido.golesVisitante > partido.golesLocal ? 'winner' : partido.golesVisitante < partido.golesLocal ? 'loser' : 'draw';
+                }
+                html += `<div class="match">`;
+                html += `<div class="match-home ${localClass}" onclick="resaltarEquipo('${partido.local}')">${partido.local}</div>`;
+                html += `<div class="match-score">${partido.resultado}</div>`;
+                html += `<div class="match-away ${visitanteClass}" onclick="resaltarEquipo('${partido.visitante}')">${partido.visitante}</div>`;
+                html += `</div>`;
+            });
+            html += '</div>';
+        });
+        html += '</div>';
+        div.innerHTML = html;
+    }
+
+    function resaltarEquipo(equipo) {
+        if (equipoSeleccionado === equipo) {
+            equipoSeleccionado = null;
+            document.querySelectorAll('.highlighted').forEach(el => el.classList.remove('highlighted'));
+        } else {
+            equipoSeleccionado = equipo;
+            document.querySelectorAll('.highlighted').forEach(el => el.classList.remove('highlighted'));
+            document.querySelectorAll('.match-home, .match-away').forEach(el => {
+                if (el.textContent === equipo) el.classList.add('highlighted');
+            });
+        }
+    }
+
+    // ==================== FUNCIÓN MOSTRAR HEAD TO HEAD MODIFICADA ====================
+    function mostrarHeadToHead() {
+        const team1 = document.getElementById('team1').value;
+        const team2 = document.getElementById('team2').value;
+        const div = document.getElementById('headtohead');
+        
+        if (!team1 || !team2 || team1 === team2) {
+            div.style.display = 'none';
+            return;
+        }
+
+        const matches = [];
+        todasLasJornadas.forEach(jornada => {
+            jornada.partidos.forEach(partido => {
+                if ((partido.local === team1 && partido.visitante === team2) || (partido.local === team2 && partido.visitante === team1)) {
+                    matches.push({
+                        jornada: jornada.titulo,
+                        temporada: jornada.temporada,
+                        local: partido.local,
+                        visitante: partido.visitante,
+                        resultado: partido.resultado,
+                        // Para ordenar, creamos una fecha ficticia: primero por temporada (desc), luego por número de jornada extraído
+                        orden: (jornada.temporada || 0) * 100 + (parseInt(jornada.titulo.replace('Jornada ', '')) || 0)
+                    });
+                }
+            });
+        });
+
+        // Ordenar de más reciente a más antiguo (por temporada desc, luego jornada desc)
+        matches.sort((a, b) => b.orden - a.orden);
+
+        const totalMatches = matches.length;
+        const mostrarMatches = matches.slice(0, 5); // Solo los 5 más recientes
+
+        let html = `<h3>Partidos entre ${team1} y ${team2}</h3>`;
+
+        if (totalMatches === 0) {
+            html += '<p>No se han enfrentado nunca.</p>';
+        } else {
+            mostrarMatches.forEach(m => {
+                let tempStr = '';
+                if (m.temporada === TEMPORADA_ACTUAL) {
+                    tempStr = 'Temp. actual - ';
+                } else if (m.temporada) {
+                    tempStr = `Temp. ${m.temporada} - `;
+                }
+                html += `<div class="match">${tempStr}${m.jornada}: ${m.local} ${m.resultado} ${m.visitante}</div>`;
+            });
+
+            if (totalMatches > 5) {
+                html += `<div><a href="${headToHeadUrl}" target="_blank" class="ver-mas-link">Ver más (${totalMatches - 5} partidos más)</a></div>`;
+            }
+        }
+
+        div.innerHTML = html;
+        div.style.display = 'block';
+    }
+
+    function toggleFutureJornadas() {
+        const futureDiv = document.getElementById('future-resultados');
+        const link = document.querySelector('.future-link');
+        if (futureDiv.style.display === 'block') {
+            futureDiv.style.display = 'none';
+            link.textContent = 'Ver próximas jornadas';
+        } else {
+            const futureJornadas = todasLasJornadas.slice(lastPlayedIndex + 1);
+            mostrarResultados(futureJornadas, 'future-resultados');
+            futureDiv.style.display = 'block';
+            link.textContent = 'Ver solo jornadas disputadas';
+        }
+    }
+
+    function cambiarStatsTab(tab) {
+        document.querySelectorAll('.stats-tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        document.querySelectorAll('.stats-tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(`stats-${tab}`).classList.add('active');
+    }
+
+    function mostrarEquipoModal(equipo, tipo) {
+        const shieldImg = shields[equipo] ? `<img src="${shields[equipo]}" width="36" height="36">` : '';
+        document.getElementById('modalTitle').innerHTML = `${shieldImg}${equipo}`;
+        document.getElementById('modalTabs').style.display = 'flex';
+
+        const currentIdx = jornadaActual === 'all' ? todasLasJornadas.length : parseInt(jornadaActual) + 1;
+        const matches = teamMatches[equipo] ? teamMatches[equipo].filter(m => m.jornada <= currentIdx) : [];
+
+        let resultadosHtml = '<div class="resultados-lista">';
+        matches.forEach(m => {
+            const lv = m.isHome ? 'L' : 'V';
+            const score = `${m.golesPropios}-${m.golesOpp}`;
+            const circleClass = `form-circle form-${m.result === 'V' ? 'win' : m.result === 'E' ? 'draw' : 'loss'}`;
+            resultadosHtml += `<div class="modal-match"><span>Jornada ${m.jornada}: ${score} ${m.opponent} (${lv})</span><span class="${circleClass}">${m.result}</span></div>`;
+        });
+        resultadosHtml += '</div>';
+
+        let progresionHtml = '<table class="progresion-table"><thead><tr><th>Jornada</th><th>Posición</th></tr></thead><tbody>';
+        for (let j = 1; j <= currentIdx; j++) {
+            const jornadasSlice = todasLasJornadas.slice(0, j);
+            let clasif = calcularClasificacion(jornadasSlice, tipo);
+            clasif.sort(sortDefault);
+            const pos = clasif.findIndex(e => e.nombre === equipo) + 1;
+            progresionHtml += `<tr><td>${j}</td><td>${pos}</td></tr>`;
+        }
+        progresionHtml += '</tbody></table>';
+
+        let maxVictoria = { diff: -Infinity, match: null };
+        let maxDerrota = { diff: Infinity, match: null };
+        let maxGoles = { total: -Infinity, match: null };
+        let maxVictoriaLocal = { diff: -Infinity, match: null };
+        let maxVictoriaVisitante = { diff: -Infinity, match: null };
+        let maxDerrotaLocal = { diff: Infinity, match: null };
+        let maxDerrotaVisitante = { diff: Infinity, match: null };
+        let empatesCasa = [], empatesFuera = [];
+
+        matches.forEach(m => {
+            const diff = m.golesPropios - m.golesOpp;
+            const total = m.golesPropios + m.golesOpp;
+            if (diff > maxVictoria.diff) { maxVictoria = { diff, match: m }; }
+            if (diff < maxDerrota.diff) { maxDerrota = { diff, match: m }; }
+            if (total > maxGoles.total) { maxGoles = { total, match: m }; }
+            if (m.isHome && diff > maxVictoriaLocal.diff) { maxVictoriaLocal = { diff, match: m }; }
+            if (!m.isHome && diff > maxVictoriaVisitante.diff) { maxVictoriaVisitante = { diff, match: m }; }
+            if (m.isHome && diff < maxDerrotaLocal.diff) { maxDerrotaLocal = { diff, match: m }; }
+            if (!m.isHome && diff < maxDerrotaVisitante.diff) { maxDerrotaVisitante = { diff, match: m }; }
+            if (m.result === 'E') {
+                if (m.isHome) empatesCasa.push(m); else empatesFuera.push(m);
+            }
+        });
+
+        let destacadosHtml = '<ul class="destacados-lista">';
+        if (maxVictoria.match) destacadosHtml += `<li><strong>Mayor victoria:</strong> ${maxVictoria.match.golesPropios}-${maxVictoria.match.golesOpp} vs ${maxVictoria.match.opponent} (J${maxVictoria.match.jornada})</li>`;
+        if (maxDerrota.match) destacadosHtml += `<li><strong>Mayor derrota:</strong> ${maxDerrota.match.golesPropios}-${maxDerrota.match.golesOpp} vs ${maxDerrota.match.opponent} (J${maxDerrota.match.jornada})</li>`;
+        if (maxGoles.match) destacadosHtml += `<li><strong>Partido con más goles:</strong> ${maxGoles.match.golesPropios}-${maxGoles.match.golesOpp} vs ${maxGoles.match.opponent} (J${maxGoles.match.jornada})</li>`;
+        if (maxVictoriaLocal.match) destacadosHtml += `<li><strong>Mayor victoria local:</strong> ${maxVictoriaLocal.match.golesPropios}-${maxVictoriaLocal.match.golesOpp} vs ${maxVictoriaLocal.match.opponent} (J${maxVictoriaLocal.match.jornada})</li>`;
+        if (maxVictoriaVisitante.match) destacadosHtml += `<li><strong>Mayor victoria visitante:</strong> ${maxVictoriaVisitante.match.golesPropios}-${maxVictoriaVisitante.match.golesOpp} vs ${maxVictoriaVisitante.match.opponent} (J${maxVictoriaVisitante.match.jornada})</li>`;
+        if (maxDerrotaLocal.match) destacadosHtml += `<li><strong>Mayor derrota local:</strong> ${maxDerrotaLocal.match.golesPropios}-${maxDerrotaLocal.match.golesOpp} vs ${maxDerrotaLocal.match.opponent} (J${maxDerrotaLocal.match.jornada})</li>`;
+        if (maxDerrotaVisitante.match) destacadosHtml += `<li><strong>Mayor derrota visitante:</strong> ${maxDerrotaVisitante.match.golesPropios}-${maxDerrotaVisitante.match.golesOpp} vs ${maxDerrotaVisitante.match.opponent} (J${maxDerrotaVisitante.match.jornada})</li>`;
+        destacadosHtml += `<li><strong>Empates en casa:</strong> ${empatesCasa.length}</li>`;
+        destacadosHtml += `<li><strong>Empates fuera:</strong> ${empatesFuera.length}</li>`;
+        destacadosHtml += '</ul>';
+
+        document.getElementById('modalBody').innerHTML = `
+            <div id="resultados-tab" class="modal-tab-content active">${resultadosHtml}</div>
+            <div id="progresion-tab" class="modal-tab-content">${progresionHtml}</div>
+            <div id="destacados-tab" class="modal-tab-content">${destacadosHtml}</div>
+        `;
+        document.getElementById('modal').style.display = 'block';
+    }
+
+    function cambiarModalTab(tab) {
+        document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        document.querySelectorAll('.modal-tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(`${tab}-tab`).classList.add('active');
+    }
+
+    function calcularYMostrarClasificacion() {
+        const currentIdx = jornadaActual === 'all' ? todasLasJornadas.length - 1 : parseInt(jornadaActual);
+        const jornadasACalcular = todasLasJornadas.slice(0, currentIdx + 1);
+
+        const teamForms = {};
+        Object.keys(teamMatches).forEach(team => {
+            const filteredMatches = teamMatches[team].filter(m => m.jornada - 1 <= currentIdx);
+            const last5 = filteredMatches.slice(-5);
+            teamForms[team] = last5.map(m => ({
+                result: m.result,
+                title: `Jornada ${m.jornada}: ${m.result === 'V' ? 'Victoria' : m.result === 'E' ? 'Empate' : 'Derrota'} ${m.isHome ? 'en casa' : 'fuera'} contra ${m.opponent} (${m.golesPropios}-${m.golesOpp})`
+            }));
+        });
+
+        let prevPosGeneral = null, prevPosLocal = null, prevPosVisitante = null;
+        if (currentIdx >= 1) {
+            const prevJornadas = todasLasJornadas.slice(0, currentIdx);
+            const prevGeneral = calcularClasificacion(prevJornadas, 'general');
+            prevGeneral.sort(sortDefault);
+            prevPosGeneral = {};
+            prevGeneral.forEach((e, i) => prevPosGeneral[e.nombre] = i + 1);
+
+            const prevLocal = calcularClasificacion(prevJornadas, 'local');
+            prevLocal.sort(sortDefault);
+            prevPosLocal = {};
+            prevLocal.forEach((e, i) => prevPosLocal[e.nombre] = i + 1);
+
+            const prevVisitante = calcularClasificacion(prevJornadas, 'visitante');
+            prevVisitante.sort(sortDefault);
+            prevPosVisitante = {};
+            prevVisitante.forEach((e, i) => prevPosVisitante[e.nombre] = i + 1);
+        }
+
+        equiposGeneral = calcularClasificacion(jornadasACalcular, 'general');
+        equiposGeneral.forEach(e => { e.form = teamForms[e.nombre] || []; e.prevPos = prevPosGeneral ? prevPosGeneral[e.nombre] : null; });
+        sortEquipos(equiposGeneral, currentSort.general.key, currentSort.general.dir);
+        document.getElementById('tabla-general').innerHTML = crearTablaClasificacion(equiposGeneral, 'general', temporadaSeleccionada === 'historica');
+
+        equiposLocal = calcularClasificacion(jornadasACalcular, 'local');
+        equiposLocal.forEach(e => { e.form = teamForms[e.nombre] || []; e.prevPos = prevPosLocal ? prevPosLocal[e.nombre] : null; });
+        sortEquipos(equiposLocal, currentSort.local.key, currentSort.local.dir);
+        document.getElementById('tabla-local').innerHTML = crearTablaClasificacion(equiposLocal, 'local', temporadaSeleccionada === 'historica');
+
+        equiposVisitante = calcularClasificacion(jornadasACalcular, 'visitante');
+        equiposVisitante.forEach(e => { e.form = teamForms[e.nombre] || []; e.prevPos = prevPosVisitante ? prevPosVisitante[e.nombre] : null; });
+        sortEquipos(equiposVisitante, currentSort.visitante.key, currentSort.visitante.dir);
+        document.getElementById('tabla-visitante').innerHTML = crearTablaClasificacion(equiposVisitante, 'visitante', temporadaSeleccionada === 'historica');
+    }
+
+    // ==================== FUNCIONES PARA TEMPORADAS PASADAS ====================
+    async function cargarTemporadasPasadas() {
+        try {
+            const response = await fetch('https://www.tusoccermanager.com/h112-alltimescores-html', { cache: 'no-cache' });
+            if (!response.ok) throw new Error('Error al cargar historial');
+            const text = await response.text();
+            parsearTemporadas(text);
+        } catch (err) {
+            console.error('Error cargando temporadas pasadas:', err);
+        }
+    }
+
+    function parsearTemporadas(texto) {
+        const lineas = texto.split('\n');
+        let i = 0;
+        const tempRegex = /^TEMPORADA\s+(\d+)\s+\(PRIMERA DIVISIÓN\)/i;
+        const jornadaRegex = /^Jornada\s+(\d+)\s+https?:\/\//i;
+        const resultadoRegex = /^([A-Za-zÁÉÍÓÚÑáéíóúñ\s]+?)\s+(\d+)-(\d+)\s+([A-Za-zÁÉÍÓÚÑáéíóúñ\s]+)$/;
+
+        let maxTempHistorica = 0;
+
+        while (i < lineas.length) {
+            let linea = lineas[i].trim();
+            if (tempRegex.test(linea)) {
+                const match = linea.match(tempRegex);
+                const numTemp = parseInt(match[1]);
+                if (numTemp > maxTempHistorica) maxTempHistorica = numTemp;
+                i++;
+                let jornadas = [];
+                let teamMatchesTemp = {};
+                let jornadaActualNum = null;
+                let partidosJornada = [];
+
+                if (!equiposPorTemporada.has(numTemp)) equiposPorTemporada.set(numTemp, new Set());
+
+                while (i < lineas.length && !tempRegex.test(lineas[i].trim()) && !lineas[i].includes('SEGUNDA DIVISIÓN')) {
+                    linea = lineas[i].trim();
+                    if (jornadaRegex.test(linea)) {
+                        if (jornadaActualNum !== null && partidosJornada.length > 0) {
+                            jornadas.push({ titulo: `Jornada ${jornadaActualNum}`, partidos: partidosJornada, temporada: numTemp });
+                        }
+                        const jMatch = linea.match(jornadaRegex);
+                        jornadaActualNum = parseInt(jMatch[1]);
+                        partidosJornada = [];
+                    } else if (resultadoRegex.test(linea)) {
+                        const rMatch = linea.match(resultadoRegex);
+                        let local = rMatch[1].trim();
+                        let golesLocal = parseInt(rMatch[2]);
+                        let golesVisitante = parseInt(rMatch[3]);
+                        let visitante = rMatch[4].trim();
+
+                        const partido = {
+                            local, visitante, golesLocal, golesVisitante,
+                            resultado: `${golesLocal}-${golesVisitante}`,
+                            isPlayed: true
+                        };
+                        partidosJornada.push(partido);
+
+                        equiposPorTemporada.get(numTemp).add(local);
+                        equiposPorTemporada.get(numTemp).add(visitante);
+
+                        if (!teamMatchesTemp[local]) teamMatchesTemp[local] = [];
+                        teamMatchesTemp[local].push({
+                            jornada: jornadaActualNum,
+                            opponent: visitante,
+                            isHome: true,
+                            golesPropios: golesLocal,
+                            golesOpp: golesVisitante,
+                            result: golesLocal > golesVisitante ? 'V' : golesLocal === golesVisitante ? 'E' : 'D'
+                        });
+                        if (!teamMatchesTemp[visitante]) teamMatchesTemp[visitante] = [];
+                        teamMatchesTemp[visitante].push({
+                            jornada: jornadaActualNum,
+                            opponent: local,
+                            isHome: false,
+                            golesPropios: golesVisitante,
+                            golesOpp: golesLocal,
+                            result: golesVisitante > golesLocal ? 'V' : golesVisitante === golesLocal ? 'E' : 'D'
+                        });
+                    }
+                    i++;
+                }
+                if (jornadaActualNum !== null && partidosJornada.length > 0) {
+                    jornadas.push({ titulo: `Jornada ${jornadaActualNum}`, partidos: partidosJornada, temporada: numTemp });
+                }
+                if (jornadas.length > 0) {
+                    temporadasPasadas[numTemp] = { jornadas, teamMatches: teamMatchesTemp };
+                }
+            } else {
+                i++;
+            }
+        }
+
+        TEMPORADA_ACTUAL = maxTempHistorica + 1;
+        temporadasDisponibles = Array.from(equiposPorTemporada.keys()).sort((a, b) => a - b);
+        llenarSelectorTemporadas();
+    }
+
+    function llenarSelectorTemporadas() {
+        const select = document.getElementById('temporadaSelect');
+        while (select.options.length > 1) select.remove(1);
+        const numeros = Object.keys(temporadasPasadas).map(n => parseInt(n)).sort((a, b) => b - a);
+        numeros.forEach(num => {
+            select.appendChild(new Option(`Temporada ${num}`, num));
+        });
+        select.appendChild(new Option('Clasificación histórica', 'historica'));
+    }
+
+    function cambiarTemporada() {
+        const select = document.getElementById('temporadaSelect');
+        const valor = select.value;
+        temporadaSeleccionada = valor;
+
+        const resultadosDiv = document.getElementById('resultados');
+        const futureDiv = document.getElementById('future-resultados');
+        const futureLink = document.querySelector('.future-link');
+        const clickEquiposMsg = document.getElementById('click-equipos-message');
+        const sliderContainer = document.getElementById('rangeSliderContainer');
+
+        const msg = document.getElementById('historico-mensaje');
+        if (msg) msg.remove();
+
+        if (valor === 'actual') {
+            todasLasJornadas = datosTemporadaActual ? JSON.parse(JSON.stringify(datosTemporadaActual)) : [];
+            reconstruirTeamMatchesDesdeJornadas(todasLasJornadas);
+            resultadosDiv.style.display = 'block';
+            futureLink.style.display = 'block';
+            if (futureDiv) futureDiv.style.display = 'none';
+            clickEquiposMsg.style.display = 'inline';
+            sliderContainer.style.display = 'none';
+            actualizarVista();
+        } else if (valor === 'historica') {
+            // Combinar todas las temporadas pasadas + actual
+            const jornadasCombinadas = [];
+            Object.values(temporadasPasadas).forEach(t => jornadasCombinadas.push(...t.jornadas));
+            if (datosTemporadaActual) {
+                const actualConTemp = datosTemporadaActual.map(j => ({ ...j, temporada: TEMPORADA_ACTUAL }));
+                jornadasCombinadas.push(...actualConTemp);
+            }
+            todasLasJornadasCompleto = jornadasCombinadas;
+            todasLasJornadas = JSON.parse(JSON.stringify(todasLasJornadasCompleto));
+            reconstruirTeamMatchesDesdeJornadas(todasLasJornadas);
+            resultadosDiv.style.display = 'none';
+            futureLink.style.display = 'none';
+            if (futureDiv) futureDiv.style.display = 'none';
+            clickEquiposMsg.style.display = 'none';
+
+            // Configurar slider
+            const minTemp = Math.min(...temporadasDisponibles, TEMPORADA_ACTUAL);
+            const maxTemp = Math.max(...temporadasDisponibles, TEMPORADA_ACTUAL);
+            const minSlider = document.getElementById('minTempSlider');
+            const maxSlider = document.getElementById('maxTempSlider');
+            minSlider.min = minTemp;
+            minSlider.max = maxTemp;
+            minSlider.value = minTemp;
+            maxSlider.min = minTemp;
+            maxSlider.max = maxTemp;
+            maxSlider.value = maxTemp;
+            document.getElementById('minTempLabel').textContent = `Temp. mín: ${minTemp}`;
+            document.getElementById('maxTempLabel').textContent = `Temp. máx: ${maxTemp}`;
+            sliderContainer.style.display = 'block';
+
+            const mensaje = document.createElement('div');
+            mensaje.className = 'historico-message';
+            mensaje.id = 'historico-mensaje';
+            mensaje.textContent = 'Mostrando clasificación histórica (todas las temporadas combinadas desde la 36). Los resultados de partidos no se muestran por razones de espacio.';
+            resultadosDiv.parentNode.insertBefore(mensaje, resultadosDiv);
+
+            actualizarVista();
+        } else {
+            const tempData = temporadasPasadas[valor];
+            if (tempData) {
+                todasLasJornadas = JSON.parse(JSON.stringify(tempData.jornadas));
+                teamMatches = JSON.parse(JSON.stringify(tempData.teamMatches));
+                resultadosDiv.style.display = 'block';
+                futureLink.style.display = 'block';
+                if (futureDiv) futureDiv.style.display = 'none';
+                clickEquiposMsg.style.display = 'inline';
+                sliderContainer.style.display = 'none';
+                actualizarVista();
+            }
+        }
+    }
+
+    function actualizarRangoHistorico() {
+        if (temporadaSeleccionada !== 'historica') return;
+        const minVal = parseInt(document.getElementById('minTempSlider').value);
+        const maxVal = parseInt(document.getElementById('maxTempSlider').value);
+        if (minVal > maxVal) {
+            document.getElementById('minTempSlider').value = maxVal;
+            document.getElementById('maxTempSlider').value = minVal;
+            var newMin = parseInt(document.getElementById('minTempSlider').value);
+            var newMax = parseInt(document.getElementById('maxTempSlider').value);
+            document.getElementById('minTempLabel').textContent = `Temp. mín: ${newMin}`;
+            document.getElementById('maxTempLabel').textContent = `Temp. máx: ${newMax}`;
+            filtrarPorRango(newMin, newMax);
+        } else {
+            document.getElementById('minTempLabel').textContent = `Temp. mín: ${minVal}`;
+            document.getElementById('maxTempLabel').textContent = `Temp. máx: ${maxVal}`;
+            filtrarPorRango(minVal, maxVal);
+        }
+    }
+
+    function filtrarPorRango(minTemp, maxTemp) {
+        const filtradas = todasLasJornadasCompleto.filter(j => j.temporada >= minTemp && j.temporada <= maxTemp);
+        todasLasJornadas = filtradas;
+        reconstruirTeamMatchesDesdeJornadas(todasLasJornadas);
+        lastPlayedIndex = todasLasJornadas.length - 1;
+        llenarSelectorJornadas();
+        calcularYMostrarClasificacion();
+        teamsList = Object.keys(teamMatches).sort();
+        llenarSelectoresEquipos();
+        calcularEstadisticasLiga();
+    }
+
+    function reconstruirTeamMatchesDesdeJornadas(jornadas) {
+        const matches = {};
+        jornadas.forEach((jornada, idx) => {
+            const numJornada = idx + 1;
+            jornada.partidos.forEach(partido => {
+                if (!partido.isPlayed) return;
+                const { local, visitante, golesLocal, golesVisitante } = partido;
+                if (!matches[local]) matches[local] = [];
+                matches[local].push({
+                    jornada: numJornada,
+                    opponent: visitante,
+                    isHome: true,
+                    golesPropios: golesLocal,
+                    golesOpp: golesVisitante,
+                    result: golesLocal > golesVisitante ? 'V' : golesLocal === golesVisitante ? 'E' : 'D'
+                });
+                if (!matches[visitante]) matches[visitante] = [];
+                matches[visitante].push({
+                    jornada: numJornada,
+                    opponent: local,
+                    isHome: false,
+                    golesPropios: golesVisitante,
+                    golesOpp: golesLocal,
+                    result: golesVisitante > golesLocal ? 'V' : golesVisitante === golesLocal ? 'E' : 'D'
+                });
+            });
+        });
+        teamMatches = matches;
+    }
+
+    function actualizarVista() {
+        if (temporadaSeleccionada === 'actual') {
+            lastPlayedIndex = todasLasJornadas.reduce((max, j, i) => j.partidos.some(p => p.isPlayed) ? i : max, -1);
+        } else {
+            lastPlayedIndex = todasLasJornadas.length - 1;
+        }
+        llenarSelectorJornadas();
+        if (temporadaSeleccionada !== 'historica') {
+            const playedJornadas = todasLasJornadas.slice(0, lastPlayedIndex + 1);
+            mostrarResultados(playedJornadas, 'resultados');
+        }
+        calcularYMostrarClasificacion();
+        teamsList = Object.keys(teamMatches).sort();
+        llenarSelectoresEquipos();
+        calcularEstadisticasLiga();
+    }
+
+    // ==================== RANKING DE TEMPORADAS ====================
+    function generarRankingTemporadas() {
+        const equipoContador = new Map();
+        for (let [temp, equiposSet] of equiposPorTemporada.entries()) {
+            equiposSet.forEach(equipo => {
+                equipoContador.set(equipo, (equipoContador.get(equipo) || 0) + 1);
+            });
+        }
+        // Incluir la temporada actual
+        if (datosTemporadaActual) {
+            const equiposActuales = new Set();
+            datosTemporadaActual.forEach(j => {
+                j.partidos.forEach(p => {
+                    if (p.local) equiposActuales.add(p.local);
+                    if (p.visitante) equiposActuales.add(p.visitante);
+                });
+            });
+            equiposActuales.forEach(equipo => {
+                equipoContador.set(equipo, (equipoContador.get(equipo) || 0) + 1);
+            });
+        }
+
+        const ranking = Array.from(equipoContador.entries())
+            .map(([equipo, count]) => ({ equipo, count }))
+            .sort((a, b) => b.count - a.count);
+        let html = '<ul class="destacados-lista">';
+        ranking.forEach(item => {
+            html += `<li><strong>${item.equipo}:</strong> ${item.count} temporada${item.count !== 1 ? 's' : ''}</li>`;
+        });
+        html += '</ul>';
+        return html;
+    }
+
+    // ==================== ESTADÍSTICAS DE LIGA ====================
+    function computeLeaderAndColistaCounts() {
+        const leaderCount = {};
+        const colistaCount = {};
+        Object.keys(teamMatches).forEach(team => {
+            leaderCount[team] = 0;
+            colistaCount[team] = 0;
+        });
+
+        for (let j = 1; j <= lastPlayedIndex + 1; j++) {
+            const jornadasSlice = todasLasJornadas.slice(0, j);
+            let clasif = calcularClasificacion(jornadasSlice, 'general');
+            clasif.sort(sortDefault);
+            if (clasif.length === 0) continue;
+            const leader = clasif[0].nombre;
+            const colista = clasif[clasif.length - 1].nombre;
+            if (leaderCount[leader] !== undefined) leaderCount[leader]++;
+            if (colistaCount[colista] !== undefined) colistaCount[colista]++;
+        }
+
+        let maxLeader = 0, maxColista = 0;
+        let leaderTeams = [], colistaTeams = [];
+        for (let team in leaderCount) {
+            if (leaderCount[team] > maxLeader) {
+                maxLeader = leaderCount[team];
+                leaderTeams = [team];
+            } else if (leaderCount[team] === maxLeader) {
+                leaderTeams.push(team);
+            }
+            if (colistaCount[team] > maxColista) {
+                maxColista = colistaCount[team];
+                colistaTeams = [team];
+            } else if (colistaCount[team] === maxColista) {
+                colistaTeams.push(team);
+            }
+        }
+        return { leaderTeams, maxLeader, colistaTeams, maxColista };
+    }
+
+    function calcularEstadisticasLiga() {
+        let playedPartidos = [];
+        for (let i = 0; i <= lastPlayedIndex; i++) {
+            todasLasJornadas[i].partidos.forEach(p => {
+                if (p.isPlayed) playedPartidos.push({ partido: p, jornada: todasLasJornadas[i].titulo });
+            });
+        }
+
+        if (playedPartidos.length === 0) return;
+
+        let totalMatches = playedPartidos.length;
+        let totalGoals = 0, homeGoals = 0, awayGoals = 0, homeWins = 0, draws = 0, awayWins = 0;
+        let resultsMap = new Map();
+        let maxGoals = { total: 0, match: null };
+
+        playedPartidos.forEach(({ partido, jornada }) => {
+            let gl = partido.golesLocal, gv = partido.golesVisitante;
+            totalGoals += gl + gv;
+            homeGoals += gl;
+            awayGoals += gv;
+            if (gl > gv) homeWins++;
+            else if (gl < gv) awayWins++;
+            else draws++;
+            let res = `${gl}-${gv}`;
+            resultsMap.set(res, (resultsMap.get(res) || 0) + 1);
+            let tot = gl + gv;
+            if (tot > maxGoals.total) {
+                maxGoals = { total: tot, match: `${partido.local} ${res} ${partido.visitante} (${jornada})` };
+            }
+        });
+
+        let avgGoals = (totalGoals / totalMatches).toFixed(2);
+        let avgHome = (homeGoals / totalMatches).toFixed(2);
+        let avgAway = (awayGoals / totalMatches).toFixed(2);
+        let mostRepeatedEntry = Array.from(resultsMap.entries()).reduce((a, b) => b[1] > a[1] ? b : a);
+        let mostRepeated = mostRepeatedEntry[0];
+        let mostRepeatedCount = mostRepeatedEntry[1];
+
+        let cleanSheets = {};
+        Object.keys(teamMatches).forEach(team => {
+            cleanSheets[team] = teamMatches[team].filter(m => m.golesOpp === 0).length;
+        });
+        let maxCS = Math.max(...Object.values(cleanSheets));
+        let teamsCS = Object.keys(cleanSheets).filter(t => cleanSheets[t] === maxCS).join(', ');
+
+        const streaks = {
+            ganado: { cond: m => m.result === 'V', label: 'ganado' },
+            empatado: { cond: m => m.result === 'E', label: 'empatado' },
+            perdido: { cond: m => m.result === 'D', label: 'perdido' },
+            marcado: { cond: m => m.golesPropios > 0, label: 'marcado' },
+            encajado: { cond: m => m.golesOpp > 0, label: 'encajado' },
+            clean: { cond: m => m.golesOpp === 0, label: 'mantenido su portería a cero' }
+        };
+
+        let maxStreaks = {};
+        Object.keys(streaks).forEach(key => {
+            maxStreaks[key] = { max: 0, teams: [] };
+        });
+
+        Object.keys(teamMatches).forEach(team => {
+            const matches = teamMatches[team];
+            Object.keys(streaks).forEach(key => {
+                let current = 0, max = 0;
+                matches.forEach(m => {
+                    if (streaks[key].cond(m)) { current++; max = Math.max(max, current); }
+                    else current = 0;
+                });
+                if (max > maxStreaks[key].max) {
+                    maxStreaks[key].max = max;
+                    maxStreaks[key].teams = [team];
+                } else if (max === maxStreaks[key].max) {
+                    maxStreaks[key].teams.push(team);
+                }
+            });
+        });
+
+        const { leaderTeams, maxLeader, colistaTeams, maxColista } = computeLeaderAndColistaCounts();
+        const rankingHtml = generarRankingTemporadas();
+
+        let stats1Html = '<ul class="destacados-lista">';
+        stats1Html += `<li><strong>Goles totales:</strong> ${totalGoals}</li>`;
+        stats1Html += `<li><strong>Promedio de goles por partido:</strong> ${avgGoals}</li>`;
+        stats1Html += `<li><strong>Promedio de goles locales:</strong> ${avgHome}</li>`;
+        stats1Html += `<li><strong>Promedio de goles visitantes:</strong> ${avgAway}</li>`;
+        stats1Html += `<li><strong>Victorias locales:</strong> ${homeWins}</li>`;
+        stats1Html += `<li><strong>Empates:</strong> ${draws}</li>`;
+        stats1Html += `<li><strong>Victorias visitantes:</strong> ${awayWins}</li>`;
+        stats1Html += `<li><strong>Resultado más repetido:</strong> ${mostRepeated} (${mostRepeatedCount} veces)</li>`;
+        stats1Html += `<li><strong>Partido con más goles:</strong> ${maxGoals.match} (${maxGoals.total} goles)</li>`;
+        stats1Html += '</ul>';
+
+        let stats2Html = '<ul class="destacados-lista">';
+        stats2Html += `<li><strong>Más jornadas como líder:</strong> ${leaderTeams.join(', ')} (${maxLeader})</li>`;
+        stats2Html += `<li><strong>Más jornadas como colista:</strong> ${colistaTeams.join(', ')} (${maxColista})</li>`;
+        stats2Html += `<li><strong>Equipo con más porterías a cero:</strong> ${teamsCS} (${maxCS})</li>`;
+        Object.keys(streaks).forEach(key => {
+            const teams = maxStreaks[key].teams.join(', ');
+            stats2Html += `<li><strong>Equipo que más partidos seguidos ha ${streaks[key].label}:</strong> ${teams} (${maxStreaks[key].max})</li>`;
+        });
+        stats2Html += '</ul>';
+
+        let stats3Html = rankingHtml;
+
+        let html = `
+            <div class="estadisticas-container">
+                <h3 class="clasificacion-title" style="margin-bottom: 15px;">Estadísticas de la liga</h3>
+                <div class="stats-tabs">
+                    <button onclick="cambiarStatsTab('generales')" class="stats-tab active">Estadísticas generales</button>
+                    <button onclick="cambiarStatsTab('equipos')" class="stats-tab">Estadísticas de equipos</button>
+                    <button onclick="cambiarStatsTab('ranking')" class="stats-tab">Ranking de temporadas en Primera División</button>
+                </div>
+                <div id="stats-generales" class="stats-tab-content active">${stats1Html}</div>
+                <div id="stats-equipos" class="stats-tab-content">${stats2Html}</div>
+                <div id="stats-ranking" class="stats-tab-content">${stats3Html}</div>
+                <button onclick="scrollToTop()" class="back-to-top" title="Volver arriba">↑</button>
+            </div>
+        `;
+
+        document.getElementById('estadisticas-liga').innerHTML = html;
+    }
+
+    // Iniciar carga
+    window.addEventListener('load', () => {
+        cargarResultados(); // Esto ahora también llama a cargarTemporadasPasadas
+    });
+</script>
+</body>
+</html>
